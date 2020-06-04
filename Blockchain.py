@@ -62,7 +62,19 @@ class Blockchain:
     @staticmethod #doesn't need an instance of this class to be executed. All objects share this
     def hash(block):
         #Hashes a block
-        pass
+        """
+        Requires:
+        block: <dict> a block with some transactions
+        
+        Effects:
+        returns the <str> SHA-256 hash of the block
+        """
+        #the dictionary representing the block must be ordered/immutable to avoid inconsistent Hashes
+
+        #changes the dictionary to a json in with a certain key order and then converts the json to a string
+        block_string = json.dumps(block, sort_keys=True).encode() 
+        return hashlib.sha256(block_string).hexdigest() #hexdigest makes it a secure hash
+        
 
     #makes the last block an attribute.
     #retrieves the last value always since we can't simply set it to a static number since the last value may change.
