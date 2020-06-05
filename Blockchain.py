@@ -13,6 +13,13 @@ class Blockchain:
         self.new_block(proof = 100, prev_hash = 1)
 
 
+    #makes the last block an attribute.
+    #retrieves the last value always since we can't simply set it to a static number since the last value may change.
+    @property
+    def last_block(self):
+        # Returns the last block in the chain
+        return self.chain[-1]
+
     def new_block(self, proof, prev_hash = None):
         #Creates a new block and adds it to the chain
         """
@@ -75,10 +82,36 @@ class Blockchain:
         block_string = json.dumps(block, sort_keys=True).encode() 
         return hashlib.sha256(block_string).hexdigest() #hexdigest makes it a secure hash
         
+    #proof of work is finding a number that solves a problem 
+    #computing the number must be difficult to compute but easy to verify
+    def compute_proof_of_work(self, prev_proof):
+        """
+        Requires:
+        last_proof: <int> The proof of work of the previous block
 
-    #makes the last block an attribute.
-    #retrieves the last value always since we can't simply set it to a static number since the last value may change.
-    @property
-    def last_block(self):
-        # Returns the last block in the chain
-        pass
+        Effects:
+        Finds a number m' such that the hash(mm') contains four leading zeros.
+        m is the previous proof of work and m' will be the new proof of work
+
+        Returns <int> m' 
+        """
+
+        proof = 0 # first guess 
+        while self.valid_proof(prev_proof = prev_proof, candidate_proof = proof) is not True:
+            proof += 1
+        return proof
+
+    def valid_proof(self, prev_proof, candidate_proof):
+        """"
+        Requires:
+        prev_proof: <int> The proof of the previous block
+        candidate_proof: <int> the proof that we want to verify
+
+        Effects:
+        validates whether the hash(prev_proof, candidate_proof) contains four leading zeros
+        Returns True or False
+        """
+        guess = f'{prev_proof}{candidate_proof}'.encode()
+        guess_hash = hashlib.sha256(guess).hexdigest()
+        return guess_hash[:4] == "0000" #checking that the first four items are zeros
+
