@@ -6,7 +6,9 @@ from time import time
 #The Blockchain class is also responsible for adding new blocks to the chain.
 class Blockchain:
     def __init__(self):
+        #the chain of blocks
         self.chain = []
+        #list of transacrtions in one block
         self.current_transactions = []
         
         #Create the genesis block 
@@ -63,7 +65,7 @@ class Blockchain:
             'recipient': recipient,
             'amount': amount
         })
-
+        #seems like there is one transaction per block (may come to a different conclusion later)
         return self.last_block['index'] + 1
     
     @staticmethod #doesn't need an instance of this class to be executed. All objects share this
