@@ -17,9 +17,40 @@ node_address = str(uuid4()).replace('-', '') #a 128 bit string
 blockchain = Blockchain()
 
 #creating endpoints
+#The mining endpoint
 @app.route('/mine', methods=['GET'])
 def mine():
-    return "Gonna mine a new block"
+    #mining endpoint will do three things:
+    #1.Calculate the proof of work
+    #2.Reward the miner by adding a transaction that grants us 1 coin
+    #3.Creates the new block and adds it to the chain
+
+
+    #running the proof of work algorithm 
+    last_block = blockchain.last_block
+    last_proof = last_block['proof']
+    curr_proof = blockchain.compute_proof_of_work(last_proof)
+
+    #receiving a reward for finding the proof
+    #A sender of '0' means this node has mined a new coin
+
+    blockchain.add_new_transaction(sender = "0", recipient = node_address, amount = 1)
+
+    #now forging the new block with all the needed info
+    prev_hash = blockchain.hash(last_block)
+    block = blockchain.new_block(proof = curr_proof, prev_hash = prev_hash) #block here automatically added to the chain
+
+    #response back to the user
+    response = {
+        'message': "New Block has been forged",
+        "index": block['index'],
+        "transactions": block['transactions'],
+        "proof": block['proof'],
+        "previous_hash" : block['previous_hash']
+    }
+
+
+    return jsonify(response), 200
 
 #where new transactions will be posted
 @app.route('/transactions/new', methods=['POST'])
