@@ -3,6 +3,7 @@ import hashlib
 import json
 from time import time
 from urlparse import urlparse
+import requests
 #chain of blocks. Each block holds transactions
 #The Blockchain class is also responsible for adding new blocks to the chain.
 class Blockchain:
@@ -16,7 +17,7 @@ class Blockchain:
         self.new_block(proof = 100, prev_hash = 1)
 
         #The other nodes
-        self.nodes = set()
+        self.node_set = set()
 
     #registering the other nodes
     def register_node(self, address):
@@ -33,7 +34,7 @@ class Blockchain:
         parsed_url = urlparse(address)
 
         #getting the location of the node on the web and adding it to the node set
-        self.nodes.add(parsed_url.netloc)
+        self.node_set.add(parsed_url.netloc)
 
         
 
@@ -177,4 +178,39 @@ class Blockchain:
 
         return True
 
+    def resolve_conflict(self):
+        """"
+        Requires:
+        None
+        Effects:
+        This is our consensus algorithm that resolves conflicts
+        Returns <bool> True if our chain was replaced, False if not
+        """
 
+        neighbors = self.node_set
+        new_chain = None
+
+        #We're looking for chains longer than our own 
+        max_len = len(self.chain)
+
+        #Check all the nodes in our network to see if they have a longer chain
+        for node in neighbors:
+            #requesting the chain data for this node
+            response = requests.get(f'http://{node}/chain')
+
+            #verifying the validity of the response
+            if response.status_code == 200:
+                length = response.json()['length']
+                chain = response.json()['chain']
+
+                #checking if the neighbor's chain is valid and that its chain length is longer than the current largest length
+                if length > max_len and self.is_chain_valid(chain):
+                    max_len = length
+                    new_chain = chain
+
+        #if the new chain is not None then it means the chain for this node is to be changed
+        if new_chain: #if not none
+            self.chain = new_chain
+            return True
+        
+        return False
