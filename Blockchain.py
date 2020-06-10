@@ -102,8 +102,10 @@ class Blockchain:
         """
         #the dictionary representing the block must be ordered/immutable to avoid inconsistent Hashes
 
-        #changes the dictionary to a json in with a certain key order and then converts the json to a string
+        #changes the dictionary to a json with a certain key order and then converts the json to a string
         block_string = json.dumps(block, sort_keys=True).encode() 
+        
+        #doing the hashing
         return hashlib.sha256(block_string).hexdigest() #hexdigest makes it a secure hash
         
     #proof of work is finding a number that solves a problem 
@@ -139,5 +141,40 @@ class Blockchain:
         guess_hash = hashlib.sha256(guess).hexdigest()
         return guess_hash[:4] == "0000" #checking that the first four items are zeros
 
+    # Consensus - resolves conflicts between two nodes
 
-    
+    #verifying validity of the chain 
+    def is_chain_valid(self, chain):
+        """"
+        Requires:
+        chain: <list> A blockchain
+        Effects:
+        Returns <bool> True if valid, False if not
+        """ 
+
+        prev_block = chain[0]
+        curr_idx = 1
+        
+        #iterating through the blocks
+        while curr_idx < len(chain):
+            curr_block = chain[curr_idx]
+            print (f'{prev_block}')
+            print (f'{curr_block}')
+            print('\n----------\n')
+
+            #check that the prev_hash stored in the current block is correct
+            #Don't need to check the first block since it is the genesis block that is certain to be valid
+
+            if curr_block['prev_hash'] != self.hash(prev_block):
+                return False
+            
+            #checking that the proof of work is correct
+            if not self.valid_proof(prev_block['proof'], curr_block['proof']):
+                return False
+            
+            prev_block = curr_block
+            curr_idx += 1 
+
+        return True
+
+
