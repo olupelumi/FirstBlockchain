@@ -46,7 +46,7 @@ def mine():
         "index": block['index'],
         "transactions": block['transactions'],
         "proof": block['proof'],
-        "previous_hash" : block['previous_hash']
+        "previous_hash" : block['prev_hash']
     }
 
 
