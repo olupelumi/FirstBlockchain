@@ -2,6 +2,7 @@
 import hashlib
 import json
 from time import time
+from urlparse import urlparse
 #chain of blocks. Each block holds transactions
 #The Blockchain class is also responsible for adding new blocks to the chain.
 class Blockchain:
@@ -14,6 +15,27 @@ class Blockchain:
         #Create the genesis block 
         self.new_block(proof = 100, prev_hash = 1)
 
+        #The other nodes
+        self.nodes = set()
+
+    #registering the other nodes
+    def register_node(self, address):
+        """
+        Requires:
+        address: <str> Address of a node. E.g 'http://192.168.0.5:5000'
+
+        Effects:
+        Adds a new node to the set of nodes
+        Returns nothing
+        """
+        #parsing the address with a general URL structure: scheme://netloc/path;parameters?query#fragment
+        #Example: urlparse('http://www.cwi.nl:80/%7Eguido/Python.html') -> ParseResult(scheme='http', netloc='www.cwi.nl:80', path='/%7Eguido/Python.html', params='', query='', fragment='')
+        parsed_url = urlparse(address)
+
+        #getting the location of the node on the web and adding it to the node set
+        self.nodes.add(parsed_url.netloc)
+
+        
 
     #makes the last block an attribute.
     #retrieves the last value always since we can't simply set it to a static number since the last value may change.
@@ -117,3 +139,5 @@ class Blockchain:
         guess_hash = hashlib.sha256(guess).hexdigest()
         return guess_hash[:4] == "0000" #checking that the first four items are zeros
 
+
+    
