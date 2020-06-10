@@ -2,7 +2,7 @@
 import hashlib
 import json
 from time import time
-from urlparse import urlparse
+from urllib.parse import urlparse
 import requests
 #chain of blocks. Each block holds transactions
 #The Blockchain class is also responsible for adding new blocks to the chain.

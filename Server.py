@@ -83,6 +83,48 @@ def full_chain():
     }
     return jsonify(response), 200
 
+#Taking care of the Decentralized and Consensus Algorithm portions
+
+#To accept a list of new nodes (in the form of URLs)
+@app.route('/nodes/register', methods=['POST'])
+def register_nodes():
+    values = request.json()
+
+    nodes = values.get('nodes')
+    if nodes is None:
+        return "Error: Please suply a valid list of nodes", 400
+    
+    for node in nodes:
+        blockchain.register_node(node)
+    
+    #responding back to the poster so they know that their POST request was successful
+    response = {
+        'message': "New nodes have been registered",
+        'total_nodes' : list(blockchain.node_set)
+    }
+    return jsonify(response), 201
+
+#Implements our consensus algorithm, resolving any conflicts--ensuring a node has the correct chain
+@app.route('/nodes/resolve', methods=['GET'])
+def consensus():
+    is_replaced = blockchain.resolve_conflict()
+
+    if is_replaced:
+        response = {
+            'message': 'Our chain was replaced',
+            'new_chain' : blockchain.chain
+        }
+        return jsonify(response), 200
+    
+    #else the current chain is the correct one
+    response = {
+        'message': 'Our chain is authoritative',
+        'chain': blockchain.chain
+    }
+    return jsonify(response), 200
+
+
+
 if __name__ == '__main__':
     #runs the server on port 5000
     app.run(host = '0.0.0.0', port = 5000)
